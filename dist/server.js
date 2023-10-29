@@ -24,7 +24,7 @@ const socket_io_1 = require("socket.io");
 const node_http_1 = require("node:http");
 dotenv_1.default.config();
 const MONGODB_URI = process.env.MONGODB_URI;
-const API_BASE_URL = process.env.NODE_ENV === 'production' ? 'https://your-production-url' : 'http://localhost:4000';
+const API_BASE_URL = process.env.NODE_ENV === 'production' ? 'https://thiscord-ten.vercel.app' : 'http://localhost:3000';
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 const server = (0, node_http_1.createServer)(app);
@@ -41,6 +41,9 @@ app.use('/api/user', user_1.default);
 app.use('/api/servers', channelServers_1.default);
 app.use('/api/chats', chats_1.default);
 app.use('/api/rooms', rooms_1.default);
+app.get('/', (req, res) => {
+    res.send('hello from server');
+});
 //Where <string is userId
 const userSockets = {};
 const voiceRooms = {};

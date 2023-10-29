@@ -13,7 +13,7 @@ import types from './types'
 dotenv.config()
 
 const MONGODB_URI:string | undefined = process.env.MONGODB_URI
-const API_BASE_URL:string = process.env.NODE_ENV === 'production' ? 'https://your-production-url' : 'http://localhost:4000';
+const API_BASE_URL:string = process.env.NODE_ENV === 'production' ? 'https://thiscord-ten.vercel.app' : 'http://localhost:3000';
 
 const app = express()
 app.use(cors())
@@ -37,6 +37,11 @@ app.use('/api/user',userRouter)
 app.use('/api/servers',serverRouter)
 app.use('/api/chats',chatRouter)
 app.use('/api/rooms',roomRouter)
+
+
+app.get('/', (req, res) => {
+    res.send('hello from server');
+});
 
 //Where <string is userId
 const userSockets:  Record<string, { socket: Socket, status: string }> = {}
