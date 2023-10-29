@@ -43,6 +43,25 @@ app.get('/', (req, res) => {
     res.send('hello from server');
 });
 
+const PORT = process.env.PORT || 4000;
+
+if (MONGODB_URI) {
+    mongoose.connect(MONGODB_URI).then(() => {
+        console.log("MongoDB connected.");
+        server.listen(PORT, () => {
+            console.log("Server running.");
+        });
+
+    });
+} else {
+    console.log("MONGODB_URI is ", MONGODB_URI);
+}
+
+
+
+
+
+
 //Where <string is userId
 const userSockets:  Record<string, { socket: Socket, status: string }> = {}
 
@@ -309,19 +328,4 @@ io.on('connection', (socket) => {
     });
 
 });
-
-const PORT = process.env.PORT || 4000;
-
-if (MONGODB_URI) {
-    mongoose.connect(MONGODB_URI).then(() => {
-        console.log("MongoDB connected.");
-        server.listen(PORT, () => {
-            console.log("Server running.");
-        });
-
-    });
-} else {
-    console.log("MONGODB_URI is ", MONGODB_URI);
-}
-
 
