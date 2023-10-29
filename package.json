@@ -8,7 +8,7 @@
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
-    "start": "nodemon --exec server.ts",
+    "start": "nodemon --exec ts-node dist/server.js",
     "dev": "nodemon --exec ts-node dist/server.js"
   },
   "type": "commonjs",
