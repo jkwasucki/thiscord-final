@@ -78,7 +78,7 @@ export const LoginUser:RequestHandler = async(req,res,next) =>{
             httpOnly: false,
             secure: process.env.NODE_ENV === 'production', 
             sameSite: 'none',
-            domain: '.vercel.app'
+            domain: 'thiscord-ten.vercel.app'
         })
        
         await user.save()
