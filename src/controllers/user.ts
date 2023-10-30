@@ -75,9 +75,9 @@ export const LoginUser:RequestHandler = async(req,res,next) =>{
         const expirationTime = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
         res.cookie("token", token, {
             expires: new Date(Date.now() + expirationTime),
-            domain: '.ondigitalocean.app',
-            
+            domain: '.ondigitalocean.app', 
             httpOnly: false,
+            sameSite:"none",
             secure: true
         })
        
