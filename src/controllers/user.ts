@@ -74,6 +74,7 @@ export const LoginUser:RequestHandler = async(req,res,next) =>{
 
         const expirationTime = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
         res.cookie("token", token, {
+            expires: new Date(Date.now() + expirationTime),
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // Set to true if served over HTTPS
             sameSite: 'strict', // Adjust based on your needs
