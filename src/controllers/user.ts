@@ -77,7 +77,7 @@ export const LoginUser:RequestHandler = async(req,res,next) =>{
             expires: new Date(Date.now() + expirationTime),
             secure: true, 
             sameSite: 'none', 
-            domain: '.ondigitalocean', 
+            domain: '.ondigitalocean.app', 
         })
        
         await user.save()
