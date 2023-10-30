@@ -27,7 +27,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const CLIENT_BASE_URL = process.env.NODE_ENV === 'production' ? 'https://thiscord-ten.vercel.app' : 'http://localhost:3000';
 const app = (0, express_1.default)();
 const corsOptions = {
-    origin: 'https://thiscord-ten.vercel.app',
+    origin: 'http://localhost:3000',
     credentials: true,
 };
 app.use((0, cors_1.default)(corsOptions));
