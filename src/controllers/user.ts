@@ -77,7 +77,7 @@ export const LoginUser:RequestHandler = async(req,res,next) =>{
             expires: new Date(Date.now() + expirationTime),
             secure: true, 
             sameSite: 'none', 
-            domain: '.ondigitalocean.app', 
+            domain: '.thiscord-backend-vycpo.ondigitalocean.app/', 
         })
        
         await user.save()
