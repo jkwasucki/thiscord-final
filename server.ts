@@ -17,7 +17,7 @@ const CLIENT_BASE_URL:string = process.env.NODE_ENV === 'production' ? 'https://
 
 const app = express()
 const corsOptions = {
-    origin:'https://thiscord-app-qwvsa.ondigitalocean.app',
+    origin:'https://thiscord-ten.vercel.app',
     credentials: true,
 };
 
