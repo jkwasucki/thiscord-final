@@ -60,6 +60,9 @@ const userSchema = new mongoose_1.Schema({
     servers: {
         type: [String]
     },
+    status: {
+        type: String
+    },
     notifications: [notificationSchema]
 });
 const UserModel = mongoose_1.default.models.users || mongoose_1.default.model('users', userSchema);

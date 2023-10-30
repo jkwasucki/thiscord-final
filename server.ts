@@ -16,7 +16,12 @@ const MONGODB_URI:string | undefined = process.env.MONGODB_URI
 const CLIENT_BASE_URL:string = process.env.NODE_ENV === 'production' ? 'https://thiscord-ten.vercel.app' : 'http://localhost:3000';
 
 const app = express()
-app.use(cors())
+const corsOptions = {
+    origin: true,
+    credentials: true,
+};
+
+app.use(cors(corsOptions));
 const server = createServer(app);
 
 const io = new Server(server, {
@@ -43,19 +48,6 @@ app.get('/', (req, res) => {
     res.send('hello from server');
 });
 
-const PORT = process.env.PORT || 4000;
-
-if (MONGODB_URI) {
-    mongoose.connect(MONGODB_URI).then(() => {
-        console.log("MongoDB connected.");
-        server.listen(PORT, () => {
-            console.log("Server running.");
-        });
-
-    });
-} else {
-    console.log("MONGODB_URI is ", MONGODB_URI);
-}
 
 
 
@@ -77,7 +69,7 @@ const voiceRooms: Record<string, Record<string,
 }>> = {};
 
 io.on('connection', (socket) => {
-
+    console.log("USER CONNECTED")
     socket.on("requestInitialActiveFriends",async(userFriends)=>{
         const socketInfoArray = await Promise.all(
             userFriends.map(async (friend:{_id:string,chatId:string}) => {
@@ -113,9 +105,10 @@ io.on('connection', (socket) => {
         userId: socketUserId,
         status,
     }));
-
+      
         // Emit the array of socket information to the joining user
         io.emit('userSocketArray', userSocketArray);
+        console.log(userSocketArray)
 
         io.emit('updateUsersSocket', { userId, status: 'active' });
     });
@@ -136,12 +129,13 @@ io.on('connection', (socket) => {
 
        // If the user ID is found, remove it from the object
        if (userId) {
+            console.log("USER DISCONNECTED",userId)
            delete userSockets[userId];
            socket.emit('disconnectRoom',(userId))
            
            io.emit('disconnectedUser', userId);
            console.log('Updated Socket Array sent to clients:', Object.keys(userSockets));
-       }
+        }
     });
 
     socket.on('inactive', (status) => {
@@ -329,3 +323,17 @@ io.on('connection', (socket) => {
 
 });
 
+
+const PORT = process.env.PORT || 4000;
+
+if (MONGODB_URI) {
+    mongoose.connect(MONGODB_URI).then(() => {
+        console.log("MongoDB connected.");
+        server.listen(PORT, () => {
+            console.log("Server running.");
+        });
+
+    });
+} else {
+    console.log("MONGODB_URI is ", MONGODB_URI);
+}

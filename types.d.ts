@@ -20,6 +20,7 @@ type User = {
         away:Boolean,
         offline:Boolean
     },
+    status:string,
     servers:string[],
     notifications:Notification[],
 }

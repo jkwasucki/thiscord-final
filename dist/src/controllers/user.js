@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SearchUsers = exports.FindUser = exports.SearchFriends = exports.RemoveFriend = exports.GetFriend = exports.GetRandFriends = exports.GetFriends = exports.AcceptInvite = exports.InviteFriend = exports.DeclineInvite = exports.GetInvites = exports.DeleteNotification = exports.ChangeUserNickname = exports.ChangeUserAvatar = exports.ChangePassword = exports.VerifyToken = exports.SendResetViaEmail = exports.RefetchUser = exports.LoginUser = exports.RegisterUser = void 0;
+exports.SearchUsers = exports.FindUser = exports.SearchFriends = exports.RemoveFriend = exports.GetFriend = exports.GetRandFriends = exports.GetFriends = exports.AcceptInvite = exports.InviteFriend = exports.DeclineInvite = exports.GetInvites = exports.DeleteNotification = exports.UpdateStatus = exports.ChangeUserNickname = exports.ChangeUserAvatar = exports.ChangePassword = exports.VerifyToken = exports.SendResetViaEmail = exports.RefetchUser = exports.LoginUser = exports.RegisterUser = void 0;
 const User_1 = __importDefault(require("../models/User"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -72,8 +72,13 @@ const LoginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function
             password: user.password
         };
         //encrypt cookie
-        const token = jsonwebtoken_1.default.sign(tokenData, process.env.JWT_SIGN_TOKEN, { expiresIn: '1d', algorithm: 'HS512' });
-        res.cookie("token", token);
+        const token = jsonwebtoken_1.default.sign(tokenData, process.env.JWT_SIGN_TOKEN, { expiresIn: '8h', algorithm: 'HS512' });
+        const expirationTime = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+        res.cookie("token", token, {
+            expires: new Date(Date.now() + expirationTime),
+            httpOnly: false,
+            path: '/'
+        });
         yield user.save();
         return res.status(200).json(user);
     }
@@ -95,8 +100,9 @@ const RefetchUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
 });
 exports.RefetchUser = RefetchUser;
 const SendResetViaEmail = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const email = req.body.email;
     try {
-        const userExists = yield User_1.default.findOne({ email: req.body.email });
+        const userExists = yield User_1.default.findOne({ email: email });
         if (!userExists) {
             return res.status(404).json("Couldn't find associated account.");
         }
@@ -105,7 +111,7 @@ const SendResetViaEmail = (req, res, next) => __awaiter(void 0, void 0, void 0, 
             _id: userExists._id,
             email: userExists.email
         };
-        const resetToken = jsonwebtoken_1.default.sign(tokenData, process.env.JWT_SIGN_TOKEN, { expiresIn: 300 });
+        const resetToken = jsonwebtoken_1.default.sign(tokenData, process.env.JWT_SIGN_TOKEN, { expiresIn: '24h', algorithm: 'HS256' });
         const OAuth2 = googleapis_1.google.auth.OAuth2;
         const oauth2Client = new OAuth2(process.env.OAUTH_CLIENTID, process.env.OAUTH_CLIENT_SECRET, "https://developers.google.com/oauthplayground" // Redirect URL
         );
@@ -154,10 +160,12 @@ const VerifyToken = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
             return res.status(400).json({ error: 'Token is not provided' });
         }
         try {
-            const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SIGN_TOKEN);
+            console.log(token);
+            const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SIGN_TOKEN, { algorithms: ['HS256'] });
             return res.status(200).json(decoded);
         }
         catch (error) {
+            console.log(error);
             return res.status(400).json("Token expired.");
         }
     }
@@ -211,6 +219,19 @@ const ChangeUserNickname = (req, res, next) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.ChangeUserNickname = ChangeUserNickname;
+const UpdateStatus = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId, status } = req.params;
+    try {
+        const user = yield User_1.default.findById(userId);
+        user.status = status;
+        yield user.save();
+        return res.status(200).json("User status changed");
+    }
+    catch (error) {
+        return res.status(500).json("Something went wrong while STATUS CHANGE");
+    }
+});
+exports.UpdateStatus = UpdateStatus;
 const DeleteNotification = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { senderId, recieverId, notificationId } = req.params;
     try {

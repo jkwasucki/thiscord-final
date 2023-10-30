@@ -19,7 +19,8 @@ import {
     GetRandFriends, 
     DeleteNotification, 
     FindUser,
-    SearchUsers
+    SearchUsers,
+    UpdateStatus
  } from '../controllers/user'
 
 const router = express.Router()
@@ -34,6 +35,7 @@ router.post('/password/change-password/:userId',ChangePassword)
 router.get('/resetpass/verifyToken',VerifyToken)
 router.post('/changeavatar/:userId',ChangeUserAvatar)
 router.post('/changenickname/:userId',ChangeUserNickname)
+router.post('/updateStatus/:userId/:status',UpdateStatus)
 //Friends
 
 //-invites

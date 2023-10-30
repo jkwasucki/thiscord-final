@@ -40,6 +40,9 @@ const userSchema = new Schema<types.User>({
     servers:{
         type:[String]
     },
+    status:{
+        type:String
+    },
     notifications:[notificationSchema]
 })
 

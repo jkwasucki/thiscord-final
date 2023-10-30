@@ -70,9 +70,14 @@ export const LoginUser:RequestHandler = async(req,res,next) =>{
         }
     
         //encrypt cookie
-        const token =  jwt.sign(tokenData,process.env.JWT_SIGN_TOKEN!,{expiresIn:'1d',algorithm: 'HS512'})
+        const token =  jwt.sign(tokenData,process.env.JWT_SIGN_TOKEN!,{expiresIn:'8h',algorithm: 'HS512'})
 
-        res.cookie("token", token);
+        const expirationTime = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+        res.cookie("token", token, {
+            expires: new Date(Date.now() + expirationTime),
+            httpOnly: false, 
+            path:'/'
+        });
        
         await user.save()
         return res.status(200).json(user);
@@ -94,9 +99,9 @@ export const RefetchUser:RequestHandler = async(req,res,next)=>{
 }
 
 export const SendResetViaEmail:RequestHandler = async(req,res,next) =>{
-   
+    const email = req.body.email
     try {
-        const userExists = await UserModel.findOne({email:req.body.email})
+        const userExists = await UserModel.findOne({email:email})
         if(!userExists){
             return res.status(404).json("Couldn't find associated account.")
         }
@@ -107,7 +112,7 @@ export const SendResetViaEmail:RequestHandler = async(req,res,next) =>{
             email:userExists.email
         }
 
-        const resetToken = jwt.sign(tokenData, process.env.JWT_SIGN_TOKEN!, { expiresIn: 300 });
+        const resetToken = jwt.sign(tokenData, process.env.JWT_SIGN_TOKEN!, { expiresIn: '24h', algorithm: 'HS256' });
   
 
 
@@ -168,9 +173,12 @@ export const VerifyToken:RequestHandler = async(req,res,next)=>{
             return res.status(400).json({ error: 'Token is not provided' });
         }
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SIGN_TOKEN!);
+            console.log(token)
+            const decoded = jwt.verify(token, process.env.JWT_SIGN_TOKEN!, { algorithms: ['HS256'] });
+            
             return res.status(200).json(decoded)
         } catch (error) {
+            console.log(error)
             return res.status(400).json("Token expired.")
         }
     } catch (error) {
@@ -221,6 +229,18 @@ export const ChangeUserNickname:RequestHandler = async(req,res,next)=>{
         return res.status(200).json("Nickname changed.")
     } catch (error) {
         return res.status(500).json("Something went wrong while CHANGE USER NICKNAME")
+    }
+}
+
+export const UpdateStatus:RequestHandler = async(req,res,next)=>{
+    const {userId,status} = req.params
+    try {
+        const user = await UserModel.findById(userId)
+        user.status = status
+        await user.save()
+        return res.status(200).json("User status changed")
+    } catch (error) {
+        return res.status(500).json("Something went wrong while STATUS CHANGE")
     }
 }
 

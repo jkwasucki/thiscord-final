@@ -24,13 +24,17 @@ const socket_io_1 = require("socket.io");
 const node_http_1 = require("node:http");
 dotenv_1.default.config();
 const MONGODB_URI = process.env.MONGODB_URI;
-const API_BASE_URL = process.env.NODE_ENV === 'production' ? 'https://thiscord-ten.vercel.app' : 'http://localhost:3000';
+const CLIENT_BASE_URL = process.env.NODE_ENV === 'production' ? 'https://thiscord-ten.vercel.app' : 'http://localhost:3000';
 const app = (0, express_1.default)();
-app.use((0, cors_1.default)());
+const corsOptions = {
+    origin: true,
+    credentials: true,
+};
+app.use((0, cors_1.default)(corsOptions));
 const server = (0, node_http_1.createServer)(app);
 const io = new socket_io_1.Server(server, {
     cors: {
-        origin: API_BASE_URL,
+        origin: CLIENT_BASE_URL,
         methods: ['GET', 'POST'],
         credentials: true
     },
@@ -48,6 +52,7 @@ app.get('/', (req, res) => {
 const userSockets = {};
 const voiceRooms = {};
 io.on('connection', (socket) => {
+    console.log("USER CONNECTED");
     socket.on("requestInitialActiveFriends", (userFriends) => __awaiter(void 0, void 0, void 0, function* () {
         const socketInfoArray = yield Promise.all(userFriends.map((friend) => __awaiter(void 0, void 0, void 0, function* () {
             if (userSockets[friend._id]) {
@@ -80,6 +85,7 @@ io.on('connection', (socket) => {
         }));
         // Emit the array of socket information to the joining user
         io.emit('userSocketArray', userSocketArray);
+        console.log(userSocketArray);
         io.emit('updateUsersSocket', { userId, status: 'active' });
     });
     socket.on('requestInitialUsersStatus', () => __awaiter(void 0, void 0, void 0, function* () {
@@ -93,6 +99,7 @@ io.on('connection', (socket) => {
         const userId = Object.keys(userSockets).find(key => userSockets[key].socket === socket);
         // If the user ID is found, remove it from the object
         if (userId) {
+            console.log("USER DISCONNECTED", userId);
             delete userSockets[userId];
             socket.emit('disconnectRoom', (userId));
             io.emit('disconnectedUser', userId);

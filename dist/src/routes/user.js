@@ -15,6 +15,7 @@ router.post('/password/change-password/:userId', user_1.ChangePassword);
 router.get('/resetpass/verifyToken', user_1.VerifyToken);
 router.post('/changeavatar/:userId', user_1.ChangeUserAvatar);
 router.post('/changenickname/:userId', user_1.ChangeUserNickname);
+router.post('/updateStatus/:userId/:status', user_1.UpdateStatus);
 //Friends
 //-invites
 router.post('/invite/:fromId/:toId', user_1.InviteFriend);
