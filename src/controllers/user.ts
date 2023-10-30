@@ -76,6 +76,7 @@ export const LoginUser:RequestHandler = async(req,res,next) =>{
         res.cookie("token", token, {
             expires: new Date(Date.now() + expirationTime),
             httpOnly: false,
+            domain:'.thiscord-backend-vycpo.ondigitalocean.app',
             secure: true
         })
        
