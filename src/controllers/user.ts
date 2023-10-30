@@ -77,7 +77,7 @@ export const LoginUser:RequestHandler = async(req,res,next) =>{
             expires: new Date(Date.now() + expirationTime),
             httpOnly: false,
             secure: process.env.NODE_ENV === 'production', 
-            sameSite: 'none',
+            sameSite: 'lax',
             domain: 'thiscord-ten.vercel.app'
         })
        
