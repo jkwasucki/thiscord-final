@@ -77,7 +77,7 @@ export const LoginUser:RequestHandler = async(req,res,next) =>{
             expires: new Date(Date.now() + expirationTime),
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // Set to true if served over HTTPS
-            sameSite: 'strict', // Adjust based on your needs
+            sameSite: 'none', // Adjust based on your needs
             path: '/',
         });
        
