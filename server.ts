@@ -19,6 +19,7 @@ const app = express()
 const corsOptions = {
     origin:'https://thiscord-ten.vercel.app',
     credentials: true,
+    exposedHeaders: ["set-cookie"],
 };
 
 app.use(cors(corsOptions));
