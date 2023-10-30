@@ -79,6 +79,7 @@ export const LoginUser:RequestHandler = async(req,res,next) =>{
             secure: process.env.NODE_ENV === 'production', // Set to true if served over HTTPS
             sameSite: 'none', // Adjust based on your needs
             path: '/',
+            domain: 'thiscord-ten.vercel.app'
         });
        
         await user.save()
