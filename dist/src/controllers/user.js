@@ -76,8 +76,9 @@ const LoginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function
         const expirationTime = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
         res.cookie("token", token, {
             expires: new Date(Date.now() + expirationTime),
+            domain: 'thiscord-ten.vercel.app',
             httpOnly: false,
-            path: '/'
+            secure: true
         });
         yield user.save();
         return res.status(200).json(user);
