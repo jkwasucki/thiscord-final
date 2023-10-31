@@ -24,7 +24,7 @@ const socket_io_1 = require("socket.io");
 const node_http_1 = require("node:http");
 dotenv_1.default.config();
 const MONGODB_URI = process.env.MONGODB_URI;
-const CLIENT_BASE_URL = process.env.NODE_ENV === 'production' ? 'https://thiscord-ten.vercel.app' : 'http://localhost:3000';
+const CLIENT_BASE_URL = process.env.NODE_ENV === 'production' ? 'https://thiscord-app-qwvsa.ondigitalocean.app' : 'http://localhost:3000';
 const app = (0, express_1.default)();
 const corsOptions = {
     origin: 'http://localhost:3000',
@@ -76,17 +76,19 @@ io.on('connection', (socket) => {
         socket.emit('requestInitialServerUsers', filteredSocketInfoArray);
     }));
     socket.on("join", (userId) => {
-        // Associate the socket with the user ID and set status to true
-        userSockets[userId] = { socket, status: 'active' };
-        // Create an array of socket information
-        const userSocketArray = Object.entries(userSockets).map(([socketUserId, { status }]) => ({
-            userId: socketUserId,
-            status,
-        }));
-        // Emit the array of socket information to the joining user
-        io.emit('userSocketArray', userSocketArray);
-        console.log(userSocketArray);
-        io.emit('updateUsersSocket', { userId, status: 'active' });
+        if (userId) {
+            // Associate the socket with the user ID and set status to true
+            userSockets[userId] = { socket, status: 'active' };
+            // Create an array of socket information
+            const userSocketArray = Object.entries(userSockets).map(([socketUserId, { status }]) => ({
+                userId: socketUserId,
+                status,
+            }));
+            // Emit the array of socket information to the joining user
+            io.emit('userSocketArray', userSocketArray);
+            console.log(userSocketArray);
+            io.emit('updateUsersSocket', { userId, status: 'active' });
+        }
     });
     socket.on('requestInitialUsersStatus', () => __awaiter(void 0, void 0, void 0, function* () {
         const socketInfoArray = yield Promise.all(Object.entries(userSockets).map(([userId, socketInfo]) => __awaiter(void 0, void 0, void 0, function* () {
@@ -113,6 +115,7 @@ io.on('connection', (socket) => {
             const userId = status._id;
             // Update the status in the socketObject
             userSockets[status._id].status = 'inactive';
+            console.log(userSockets);
             io.emit('updateUsersSocket', { userId, status: 'inactive' });
         }
     });

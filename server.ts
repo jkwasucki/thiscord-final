@@ -13,7 +13,7 @@ import types from './types'
 dotenv.config()
 
 const MONGODB_URI:string | undefined = process.env.MONGODB_URI
-const CLIENT_BASE_URL:string = process.env.NODE_ENV === 'production' ? 'https://thiscord-app-qwvsa.ondigitalocean.app' : 'http://localhost:3000';
+const CLIENT_BASE_URL:string = process.env.NODE_ENV === 'production' ? 'https://thiscord-ten.vercel.app' : 'http://localhost:3000';
 
 const app = express()
 const corsOptions = {
@@ -97,26 +97,28 @@ io.on('connection', (socket) => {
     })
 
     socket.on("join", (userId) => {
-        // Associate the socket with the user ID and set status to true
-        userSockets[userId] = { socket, status: 'active' };
+        if(userId){
+            // Associate the socket with the user ID and set status to true
+            userSockets[userId] = { socket, status: 'active' }
 
-       // Create an array of socket information
-       const userSocketArray = Object.entries(userSockets).map(([socketUserId, { status }]) => ({
-        userId: socketUserId,
-        status,
-    }));
-      
-        // Emit the array of socket information to the joining user
-        io.emit('userSocketArray', userSocketArray);
-        console.log(userSocketArray)
+            // Create an array of socket information
+            const userSocketArray = Object.entries(userSockets).map(([socketUserId, { status }]) => ({
+                userId: socketUserId,
+                status,
+            }));
+            
+            // Emit the array of socket information to the joining user
+            io.emit('userSocketArray', userSocketArray);
+            console.log(userSocketArray)
 
-        io.emit('updateUsersSocket', { userId, status: 'active' });
+            io.emit('updateUsersSocket', { userId, status: 'active' })
+        }
     });
 
     socket.on('requestInitialUsersStatus',async()=>{
         const socketInfoArray = await Promise.all(
             Object.entries(userSockets).map(async ([userId, socketInfo]) => {
-                return { userId, status: socketInfo.status };
+                return { userId, status: socketInfo.status }
             })
         )
         io.emit('requestedInitialUsersStatus',socketInfoArray)
@@ -125,7 +127,7 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
        // Find the user ID associated with the disconnected socket
-       const userId = Object.keys(userSockets).find(key => userSockets[key].socket === socket);
+       const userId = Object.keys(userSockets).find(key => userSockets[key].socket === socket)
 
        // If the user ID is found, remove it from the object
        if (userId) {
@@ -134,33 +136,33 @@ io.on('connection', (socket) => {
            socket.emit('disconnectRoom',(userId))
            
            io.emit('disconnectedUser', userId);
-           console.log('Updated Socket Array sent to clients:', Object.keys(userSockets));
+           console.log('Updated Socket Array sent to clients:', Object.keys(userSockets))
         }
     });
 
     socket.on('inactive', (status) => {
-        const userEntry = userSockets[status._id];
+        const userEntry = userSockets[status._id]
 
         // Check if the user entry exists in the socketObject
         if (userEntry) {
-        const userId = status._id;
+        const userId = status._id
         // Update the status in the socketObject
-        userSockets[status._id].status = 'inactive';
-        io.emit('updateUsersSocket', { userId, status: 'inactive' });
+        userSockets[status._id].status = 'inactive'
+        io.emit('updateUsersSocket', { userId, status: 'inactive' })
         }
     });
 
     socket.on('active', (status) => {
-        const userEntry = userSockets[status._id];
+        const userEntry = userSockets[status._id]
 
         // Check if the user entry exists in the socketObject
         if (userEntry) {
-            const userId = status._id;
+            const userId = status._id
             // Update the status in the socketObject
-            userEntry.status = 'active';
-            io.emit('updateUsersSocket', { userId, status: 'active' });
+            userEntry.status = 'active'
+            io.emit('updateUsersSocket', { userId, status: 'active' })
         } else {
-            console.error(`User entry not found for user ID: ${status._id}`);
+            console.error(`User entry not found for user ID: ${status._id}`)
         }
     });
 
@@ -193,7 +195,7 @@ io.on('connection', (socket) => {
                                 fullyMuted:voiceRooms[existingServerId][existingRoomId].users[userIndex].fullyMuted
                             }
                             // Remove the user from the existing room
-                            voiceRooms[existingServerId][existingRoomId].users.splice(userIndex, 1);
+                            voiceRooms[existingServerId][existingRoomId].users.splice(userIndex, 1)
                             break
                         }
                     }

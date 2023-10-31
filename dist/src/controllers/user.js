@@ -66,6 +66,20 @@ const LoginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function
         if (!isValid) {
             return res.status(400).json("Invalid password.");
         }
+        //create cookie data        
+        const tokenData = {
+            _id: user._id,
+            password: user.password
+        };
+        //encrypt cookie
+        const token = jsonwebtoken_1.default.sign(tokenData, process.env.JWT_SIGN_TOKEN, { expiresIn: '8h', algorithm: 'HS512' });
+        const expirationTime = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+        res.cookie("token", token, {
+            expires: new Date(Date.now() + expirationTime),
+            secure: true,
+            sameSite: 'none',
+            domain: '.ondigitalocean.app',
+        });
         yield user.save();
         return res.status(200).json(user);
     }
