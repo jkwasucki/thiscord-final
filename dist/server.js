@@ -24,7 +24,7 @@ const socket_io_1 = require("socket.io");
 const node_http_1 = require("node:http");
 dotenv_1.default.config();
 const MONGODB_URI = process.env.MONGODB_URI;
-const CLIENT_BASE_URL = process.env.NODE_ENV === 'production' ? 'https://thiscord-app-qwvsa.ondigitalocean.app' : 'http://localhost:3000';
+const CLIENT_BASE_URL = process.env.NODE_ENV === 'production' ? 'https://thiscord-ten.vercel.app' : 'http://localhost:3000';
 const app = (0, express_1.default)();
 const corsOptions = {
     origin: 'http://localhost:3000',
@@ -104,6 +104,7 @@ io.on('connection', (socket) => {
             console.log("USER DISCONNECTED", userId);
             delete userSockets[userId];
             socket.emit('disconnectRoom', (userId));
+            io.emit('updateUsersSocket', { userId, status: 'offline' });
             io.emit('disconnectedUser', userId);
             console.log('Updated Socket Array sent to clients:', Object.keys(userSockets));
         }
@@ -115,7 +116,6 @@ io.on('connection', (socket) => {
             const userId = status._id;
             // Update the status in the socketObject
             userSockets[status._id].status = 'inactive';
-            console.log(userSockets);
             io.emit('updateUsersSocket', { userId, status: 'inactive' });
         }
     });
