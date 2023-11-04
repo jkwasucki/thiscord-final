@@ -103,7 +103,6 @@ io.on('connection', (socket) => {
         if (userId) {
             console.log("USER DISCONNECTED", userId);
             delete userSockets[userId];
-            socket.emit('disconnectRoom', (userId));
             io.emit('updateUsersSocket', { userId, status: 'offline' });
             io.emit('disconnectedUser', userId);
             console.log('Updated Socket Array sent to clients:', Object.keys(userSockets));
