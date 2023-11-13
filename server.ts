@@ -69,7 +69,7 @@ const voiceRooms: Record<string, Record<string,
 }>> = {};
 
 io.on('connection', (socket) => {
-    console.log("USER CONNECTED")
+
     socket.on("requestInitialActiveFriends",async(userFriends)=>{
         const socketInfoArray = await Promise.all(
             userFriends.map(async (friend:{_id:string,chatId:string}) => {
@@ -110,6 +110,7 @@ io.on('connection', (socket) => {
             // Emit the array of socket information to the joining user
             io.emit('userSocketArray', userSocketArray);
             console.log(userSocketArray)
+            console.log(voiceRooms)
 
             io.emit('updateUsersSocket', { userId, status: 'active' })
         }
@@ -129,12 +130,27 @@ io.on('connection', (socket) => {
        // Find the user ID associated with the disconnected socket
        const userId = Object.keys(userSockets).find(key => userSockets[key].socket === socket)
 
+       
        // If the user ID is found, remove it from the object
        if (userId) {
             console.log("USER DISCONNECTED",userId)
            delete userSockets[userId];
-           
 
+             // Remove the user from voiceRooms
+            for (const serverId in voiceRooms) {
+                const room = voiceRooms[serverId];
+                for (const roomId in room) {
+                    const users = room[roomId].users;
+                    const userIndex = users.findIndex(user => user._id === userId);
+                    if (userIndex !== -1) {
+
+                        // Remove the user from the room
+                        users.splice(userIndex, 1);
+                        io.to(`${serverId}-${roomId}`).emit('updateVoiceRoomUsers', users);
+                        break;
+                    }
+                }
+            }
            io.emit('updateUsersSocket', { userId, status: 'offline' })
            io.emit('disconnectedUser', userId);
            console.log('Updated Socket Array sent to clients:', Object.keys(userSockets))
@@ -311,7 +327,7 @@ io.on('connection', (socket) => {
                         const userIndex = voiceRooms[serverId][roomId].users.findIndex(existingUser => existingUser._id === userId);
     
                         if (userIndex !== -1) {
-                            io.emit('requestedUserVoiceState',voiceRooms[serverId][roomId].users[userIndex])
+                            socket.emit('requestedUserVoiceState',voiceRooms[serverId][roomId].users[userIndex])
                             break;
                         }
                     }

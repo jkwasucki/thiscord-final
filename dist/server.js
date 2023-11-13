@@ -27,7 +27,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const CLIENT_BASE_URL = process.env.NODE_ENV === 'production' ? 'https://thiscord-ten.vercel.app' : 'http://localhost:3000';
 const app = (0, express_1.default)();
 const corsOptions = {
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:3000 ',
     credentials: true,
 };
 app.use((0, cors_1.default)(corsOptions));
@@ -52,7 +52,6 @@ app.get('/', (req, res) => {
 const userSockets = {};
 const voiceRooms = {};
 io.on('connection', (socket) => {
-    console.log("USER CONNECTED");
     socket.on("requestInitialActiveFriends", (userFriends) => __awaiter(void 0, void 0, void 0, function* () {
         const socketInfoArray = yield Promise.all(userFriends.map((friend) => __awaiter(void 0, void 0, void 0, function* () {
             if (userSockets[friend._id]) {
@@ -87,6 +86,7 @@ io.on('connection', (socket) => {
             // Emit the array of socket information to the joining user
             io.emit('userSocketArray', userSocketArray);
             console.log(userSocketArray);
+            console.log(voiceRooms);
             io.emit('updateUsersSocket', { userId, status: 'active' });
         }
     });
@@ -103,6 +103,20 @@ io.on('connection', (socket) => {
         if (userId) {
             console.log("USER DISCONNECTED", userId);
             delete userSockets[userId];
+            // Remove the user from voiceRooms
+            for (const serverId in voiceRooms) {
+                const room = voiceRooms[serverId];
+                for (const roomId in room) {
+                    const users = room[roomId].users;
+                    const userIndex = users.findIndex(user => user._id === userId);
+                    if (userIndex !== -1) {
+                        // Remove the user from the room
+                        users.splice(userIndex, 1);
+                        io.to(`${serverId}-${roomId}`).emit('updateVoiceRoomUsers', users);
+                        break;
+                    }
+                }
+            }
             io.emit('updateUsersSocket', { userId, status: 'offline' });
             io.emit('disconnectedUser', userId);
             console.log('Updated Socket Array sent to clients:', Object.keys(userSockets));
@@ -250,7 +264,7 @@ io.on('connection', (socket) => {
                     if (voiceRooms[serverId].hasOwnProperty(roomId)) {
                         const userIndex = voiceRooms[serverId][roomId].users.findIndex(existingUser => existingUser._id === userId);
                         if (userIndex !== -1) {
-                            io.emit('requestedUserVoiceState', voiceRooms[serverId][roomId].users[userIndex]);
+                            socket.emit('requestedUserVoiceState', voiceRooms[serverId][roomId].users[userIndex]);
                             break;
                         }
                     }
